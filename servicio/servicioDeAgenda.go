@@ -10,7 +10,14 @@ type ServicioAgendador struct {
 }
 
 func New() ServicioAgendador {
-	return ServicioAgendador{Contactos: map[string]modelos.Contacto{}}
+	agenda := map[string]modelos.Contacto{}
+	agenda["37869099"] = modelos.Contacto{
+		Nombre:   "Meze",
+		Apellido: "Abogado",
+		DNI:      "37869099",
+		Telefono: "1561814200",
+	}
+	return ServicioAgendador{Contactos: agenda}
 }
 
 func (s *ServicioAgendador) AgregarContacto(c modelos.Contacto) (*modelos.Contacto, error) {
