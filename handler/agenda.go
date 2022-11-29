@@ -1,4 +1,4 @@
-package main
+package handler
 
 import (
 	"agenda/modelos"
@@ -6,6 +6,8 @@ import (
 	"strconv"
 	"strings"
 )
+
+//go:generate mockgen -source=agenda.go -destination servicio/mock_task_service_test.go -package servicio
 
 type ServicioDeLaAgenda interface {
 	/*
@@ -43,9 +45,9 @@ func (a *Agenda) Agendar(contacto modelos.Contacto) (*string, error) {
 	if contacto.DNI == "" {
 		return nil, errors.New("dni perdido")
 	}
-	dni, err := validadorNumerosStr(contacto.DNI)
+	dniValidado, err := validadorNumerosStr(contacto.DNI)
 	if err != nil {
-		return &dni, err
+		return dniValidado, err
 	}
 	if contacto.Nombre == "" {
 		return nil, errors.New("nombre perdido")
@@ -53,9 +55,9 @@ func (a *Agenda) Agendar(contacto modelos.Contacto) (*string, error) {
 	if contacto.Telefono == "" {
 		return nil, errors.New("telefono perdido")
 	}
-	telefono, err := validadorNumerosStr(contacto.Telefono)
+	telefonoValidado, err := validadorNumerosStr(contacto.Telefono)
 	if err != nil {
-		return &telefono, err
+		return telefonoValidado, err
 	}
 	c, err := a.servicio.AgregarContacto(contacto)
 	if err != nil {
@@ -72,7 +74,7 @@ func (a *Agenda) VerContacto(dni string) (*modelos.Contacto, error) {
 	if dni == "" {
 		return nil, errors.New("DNI perdido")
 	}
-	dni, err := validadorNumerosStr(dni)
+	_, err := validadorNumerosStr(dni)
 	if err != nil {
 		return nil, err
 	}
@@ -92,9 +94,9 @@ func (a *Agenda) BorrarContacto(dni string) (*string, error) {
 		strings := "DNI Invalido"
 		return &strings, errors.New("dni perdido")
 	}
-	dni, err := validadorNumerosStr(dni)
+	dniValidado, err := validadorNumerosStr(dni)
 	if err != nil {
-		return &dni, err
+		return dniValidado, err
 	}
 	dniEliminado, err := a.servicio.EliminarContacto(dni)
 	if err != nil {
@@ -103,13 +105,17 @@ func (a *Agenda) BorrarContacto(dni string) (*string, error) {
 	return dniEliminado, nil
 }
 
-func validadorNumerosStr(numero string) (string, error) {
+func validadorNumerosStr(numero string) (*string, error) {
+	//regexp.MustCompile("^[0-9]*$")
+	//re := regexp.MustCompile("^[0-9]*$")
+	//res := re.MatchString("1231.21")
+	//fmt.Println(res)
 	if strings.Contains(numero, ".") || strings.Contains(numero, ",") {
-		return numero, errors.New("No debe contener ',' o '.' ")
+		return &numero, errors.New("No debe contener ',' o '.' ")
 	}
 	_, err := strconv.Atoi(numero)
 	if err != nil {
-		return numero, errors.New("DNI ingresado con caracter invalido")
+		return &numero, errors.New("DNI ingresado con caracter invalido")
 	}
-	return numero, nil
+	return &numero, nil
 }
